@@ -20,4 +20,4 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-export default upload; // Export the configured multer instance
+export default upload; 
