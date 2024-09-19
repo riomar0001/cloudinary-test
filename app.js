@@ -16,11 +16,9 @@ const corsOptions = {
   credentials: true,
 };
 
-
-
 app.use(cors(corsOptions));
 
-app.options('*', cors());
+app.options("*", cors());
 
 // Cloudinary configuration
 cloudinary.config({
@@ -51,15 +49,22 @@ const upload = multer({ storage });
 app.post("/upload", upload.single("image"), async (req, res) => {
   try {
     console.log("File received:", req.file);
+
+    // Upload image to Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path);
     console.log("Cloudinary upload result:", result);
 
-    // Remove the uploaded file from the server
-    await fs.unlink(req.file.path);
+    // Remove the uploaded file from the server after successful Cloudinary upload
+    try {
+      await fs.unlink(req.file.path); // Remove the file from the local server
+      console.log("File removed from server:", req.file.path);
+    } catch (unlinkError) {
+      console.error("Error removing file from server:", unlinkError);
+    }
 
-    res.json({ url: result.secure_url });
-  } catch (error) {
-    console.error("Error uploading file:", error); // Log the error for debugging
+    res.json({ url: result.secure_url }); // Respond with the Cloudinary URL
+  } catch (uploadError) {
+    console.error("Error uploading file:", uploadError); // Log the error for debugging
     res.status(500).json({ error: "Failed to upload image" });
   }
 });
