@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs/promises";
+import dotenv from "dotenv";
+dotenv.config();
 
 // Cloudinary configuration
 cloudinary.config({
@@ -8,14 +10,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
+
 // Controller function for handling the upload
 export const uploadImage = async (req, res) => {
   try {
+
     console.log("File received:", req.file);
 
     // Upload image to Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path);
     console.log("Cloudinary upload result:", result);
+
+
 
     // Remove the uploaded file from the server after successful Cloudinary upload
     try {
@@ -24,6 +31,8 @@ export const uploadImage = async (req, res) => {
     } catch (unlinkError) {
       console.error("Error removing file from server:", unlinkError);
     }
+
+
 
     // Send the response with the Cloudinary URL
     res.json({ url: result.secure_url });
